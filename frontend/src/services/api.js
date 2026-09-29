@@ -73,6 +73,57 @@ export async function submitOptimizationJob(payload) {
   }
 }
 
+export async function runPsoOptimization(payload) {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/optimization/pso`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, data };
+  } catch (err) {
+    return { ok: false, status: 0, error: err.message };
+  }
+}
+
+export async function runQpsoOptimization(payload) {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/optimization/qpso`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, data };
+  } catch (err) {
+    return { ok: false, status: 0, error: err.message };
+  }
+}
+
+export async function runOptimizationComparison(payload) {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/optimization/compare`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, data };
+  } catch (err) {
+    return { ok: false, status: 0, error: err.message };
+  }
+}
+
 export async function fetchGraphSchema() {
   try {
     const res = await fetch(`${BACKEND_BASE_URL}/api/routes/graph-schema`, {
@@ -111,6 +162,7 @@ export async function calculateRoadRoute(payload) {
         'Accept': 'application/json',
       },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(15000),
     });
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
@@ -231,6 +283,148 @@ export async function fetchVrpFormulation() {
     return await res.json();
   } catch (err) {
     return null;
+  }
+}
+
+// =========================================================================
+// Persistent Scenario & Optimization Run APIs (M2.3)
+// =========================================================================
+
+export async function fetchScenarios() {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/scenarios/`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    return { status: 'error', error: err.message, scenarios: [] };
+  }
+}
+
+export async function fetchScenarioById(id) {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/scenarios/${id}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    return { status: 'error', error: err.message, scenario: null };
+  }
+}
+
+export async function saveScenarioApi(scenarioData) {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/scenarios/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(scenarioData),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    return { status: 'error', error: err.message };
+  }
+}
+
+export async function updateScenarioApi(id, scenarioData) {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/scenarios/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(scenarioData),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    return { status: 'error', error: err.message };
+  }
+}
+
+export async function deleteScenarioApi(id) {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/scenarios/${id}`, {
+      method: 'DELETE',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    return { status: 'error', error: err.message };
+  }
+}
+
+export async function calculateScenarioBaseline(id) {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/scenarios/${id}/baseline`, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    return { status: 'error', error: err.message };
+  }
+}
+
+export async function fetchScenarioLatestRun(id) {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/scenarios/${id}/latest-run`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    return { status: 'none', run: null };
+  }
+}
+
+export async function fetchOptimizationRuns(limit = 20) {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/optimization/runs?limit=${limit}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    return { status: 'error', error: err.message, runs: [] };
+  }
+}
+
+export async function fetchOptimizationRunById(runId) {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/optimization/runs/${runId}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    return { status: 'error', error: err.message, run: null };
+  }
+}
+
+export async function fetchRunHistory(runId) {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/optimization/runs/${runId}/history`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    return { status: 'error', error: err.message };
   }
 }
 

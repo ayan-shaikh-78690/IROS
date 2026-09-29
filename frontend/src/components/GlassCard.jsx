@@ -7,6 +7,8 @@ export default function GlassCard({
   interactive = false,
   onClick,
   style = {},
+  id,
+  ...rest
 }) {
   const classes = [
     'glass-panel',
@@ -16,7 +18,7 @@ export default function GlassCard({
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={classes} onClick={onClick} style={style}>
+    <div id={id} className={classes} onClick={onClick} style={style} {...rest}>
       {children}
     </div>
   );

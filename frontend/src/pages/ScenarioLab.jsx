@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   MapPin,
   Building2,
@@ -28,6 +29,7 @@ import {
   PenTool,
   Loader2,
   Route as RouteIcon,
+  Zap,
 } from 'lucide-react';
 import {
   useScenario,
@@ -47,6 +49,7 @@ import {
 import { fetchGraphSchema } from '../services/api';
 
 export default function ScenarioLab() {
+  const navigate = useNavigate();
   const {
     scenario,
     selectedCityId,
@@ -56,6 +59,9 @@ export default function ScenarioLab() {
     activePresetId,
     loadPreset,
     setVehicleType,
+    setVehicleCount,
+    setFleetCapacity,
+    updateVehicle,
     updateScenario,
     addCustomer,
     removeCustomer,
@@ -63,6 +69,7 @@ export default function ScenarioLab() {
     setDepot,
     clearAllStops,
     resetScenario,
+    validateScenario,
     focusOnMap,
     currentRoute,
     isRoutingLoading,
@@ -71,10 +78,20 @@ export default function ScenarioLab() {
     calculateVrpSolution,
     isRoundTrip,
     setIsRoundTrip,
+    optimizedRoutes,
+    activeRouteView,
+    setActiveRouteView,
+    optimizationResults,
+    calculateBaseline,
+    saveScenarioToDb,
+    dbSyncStatus,
+    isSyncingToDb,
   } = useScenario();
 
+  const [validationFeedback, setValidationFeedback] = useState(null);
+
   // Collapsible panel states
-  const [isFleetExpanded, setIsFleetExpanded] = useState(false);
+  const [isFleetExpanded, setIsFleetExpanded] = useState(true);
   const [isPresetsExpanded, setIsPresetsExpanded] = useState(false);
   const [isTechPanelExpanded, setIsTechPanelExpanded] = useState(true);
 
@@ -305,7 +322,10 @@ export default function ScenarioLab() {
               marginBottom: '0.45rem',
             }}
           >
-            <Badge variant="cyan">M2.2-A Real Road Routing Engine</Badge>
+            <Badge variant="cyan">M2.3 Optimization Integration</Badge>
+            <Badge variant={dbSyncStatus === 'synced' ? 'success' : 'amber'}>
+              {dbSyncStatus === 'synced' ? 'SQLite Synced' : isSyncingToDb ? 'Saving to DB...' : 'DB Standby'}
+            </Badge>
             <span
               style={{
                 fontFamily: 'var(--font-mono)',
@@ -546,6 +566,156 @@ export default function ScenarioLab() {
                   {isRoundTrip ? 'Return to Depot' : 'One-Way Sequence'}
                 </span>
               </div>
+
+              {/* Primary Action: Optimize Routes -> Calculate Baseline & Navigate to Optimization Studio */}
+              <div style={{ marginTop: '0.75rem' }}>
+                <button
+                  id="optimize-routes-btn"
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={async () => {
+                    const check = validateScenario(scenario);
+                    if (!check.isValid) {
+                      setValidationFeedback(check.errors);
+                    } else {
+                      setValidationFeedback(null);
+                      // Phase 3 & Phase 10: Calculate & persist baseline before optimization starts
+                      await calculateBaseline(scenario, isRoundTrip);
+                      await saveScenarioToDb(scenario);
+                      navigate('/optimization');
+                    }
+                  }}
+                  disabled={!isRouteReady}
+                  style={{
+                    width: '100%',
+                    justifyContent: 'center',
+                    padding: '0.65rem 1rem',
+                    background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.95), rgba(99, 102, 241, 0.95))',
+                    boxShadow: '0 4px 14px rgba(14, 165, 233, 0.25)',
+                    fontWeight: 700,
+                    letterSpacing: '0.02em',
+                  }}
+                  title="Calculate baseline and open Discrete PSO / QPSO Route Solver"
+                >
+                  <Zap size={15} />
+                  <span>Optimize Routes with PSO / QPSO →</span>
+                </button>
+              </div>
+
+              {/* Validation Feedback Warning */}
+              {validationFeedback && (
+                <div
+                  style={{
+                    marginTop: '0.5rem',
+                    padding: '0.5rem 0.65rem',
+                    borderRadius: '6px',
+                    background: 'rgba(239, 68, 68, 0.12)',
+                    border: '1px solid rgba(239, 68, 68, 0.35)',
+                    color: '#f87171',
+                    fontSize: '0.75rem',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.2rem' }}>
+                    <AlertCircle size={13} />
+                    <span>Scenario Validation Alert</span>
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
+                    {validationFeedback.map((err, i) => (
+                      <li key={i}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Optimized Fleet Routes Active Toggle (When optimization has run) */}
+              {optimizedRoutes && optimizedRoutes.length > 0 && (
+                <div
+                  style={{
+                    marginTop: '0.75rem',
+                    padding: '0.65rem 0.75rem',
+                    borderRadius: '8px',
+                    background: 'rgba(14, 165, 233, 0.08)',
+                    border: '1px solid rgba(14, 165, 233, 0.25)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--cyan-bright)' }}>
+                      OPTIMIZED FLEET SOLUTION AVAILABLE
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '0.68rem',
+                        fontFamily: 'var(--font-mono)',
+                        color: '#34d399',
+                        background: 'rgba(52, 211, 153, 0.1)',
+                        padding: '0.1rem 0.4rem',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      {optimizationResults?.algorithm || 'Metaheuristic'}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <button
+                      type="button"
+                      className={`btn btn-xs ${activeRouteView === 'road' ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ flex: 1, justifyContent: 'center' }}
+                      onClick={() => setActiveRouteView('road')}
+                    >
+                      Original Route
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-xs ${activeRouteView === 'optimized' ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ flex: 1, justifyContent: 'center' }}
+                      onClick={() => setActiveRouteView('optimized')}
+                    >
+                      Optimized Fleet
+                    </button>
+                  </div>
+
+                  {/* Phase 10 Prominent CTA: VIEW OPTIMIZED ROUTES ON MAP */}
+                  <button
+                    type="button"
+                    id="view-optimized-routes-map-btn"
+                    className="btn btn-primary btn-sm"
+                    style={{
+                      width: '100%',
+                      justifyContent: 'center',
+                      marginTop: '0.35rem',
+                      background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.95), rgba(99, 102, 241, 0.95))',
+                      fontWeight: 700,
+                      fontSize: '0.78rem',
+                      letterSpacing: '0.02em',
+                    }}
+                    onClick={() => {
+                      setActiveRouteView('optimized');
+                      if (scenario.depot?.lat && scenario.depot?.lng) {
+                        focusOnMap(scenario.depot.lat, scenario.depot.lng, 13);
+                      }
+                    }}
+                  >
+                    <span>VIEW OPTIMIZED ROUTES ON MAP →</span>
+                  </button>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.15rem' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>
+                      {optimizationResults ? `Fitness: ${optimizationResults.best_fitness}` : ''}
+                    </span>
+                    <Link
+                      to="/optimization"
+                      style={{ fontSize: '0.75rem', color: 'var(--cyan-core)', textDecoration: 'none', fontWeight: 600 }}
+                    >
+                      Inspect Fleet Studio →
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Error Message if routing fails */}
@@ -1498,18 +1668,14 @@ export default function ScenarioLab() {
 
                   <div className="form-group">
                     <label className="form-label">
-                      <span>Vehicle Capacity (Units)</span>
+                      <span>Default Vehicle Capacity (kg)</span>
                     </label>
                     <input
                       type="number"
                       min="1"
                       className="form-input"
                       value={scenario.vehicleCapacity}
-                      onChange={(e) =>
-                        updateScenario({
-                          vehicleCapacity: parseFloat(e.target.value) || 0,
-                        })
-                      }
+                      onChange={(e) => setFleetCapacity(parseFloat(e.target.value) || 0)}
                       aria-label="Vehicle payload capacity"
                     />
                   </div>
@@ -1524,13 +1690,88 @@ export default function ScenarioLab() {
                       max="50"
                       className="form-input"
                       value={scenario.numVehicles}
-                      onChange={(e) =>
-                        updateScenario({
-                          numVehicles: parseInt(e.target.value, 10) || 1,
-                        })
-                      }
+                      onChange={(e) => setVehicleCount(parseInt(e.target.value, 10) || 1)}
                       aria-label="Number of vehicles"
                     />
+                  </div>
+                </div>
+
+                {/* Individual Vehicle Roster (Single Source of Truth) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                      Authoritative Fleet Roster ({scenario.vehicles?.length || scenario.numVehicles} Active Vehicles):
+                    </span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                      Synchronized across Solver &amp; Analytics
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    {(scenario.vehicles || []).map((veh, idx) => (
+                      <div
+                        key={veh.id || idx}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0.45rem 0.65rem',
+                          borderRadius: '6px',
+                          background: 'rgba(255, 255, 255, 0.03)',
+                          border: '1px solid var(--border-subtle)',
+                          fontSize: '0.75rem',
+                          fontFamily: 'var(--font-mono)',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Truck size={14} color="var(--cyan-core)" />
+                          <span style={{ fontWeight: 700, color: 'var(--cyan-bright)' }}>{veh.id}</span>
+                          <span style={{ color: 'var(--text-secondary)' }}>{veh.name || `Vehicle ${idx + 1}`}</span>
+                          <span style={{ color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+                            ({veh.vehicle_type || veh.vehicleType || scenario.vehicleType || 'VAN'})
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <span style={{ color: 'var(--text-tertiary)' }}>Cap:</span>
+                            <input
+                              type="number"
+                              min="1"
+                              value={veh.capacity}
+                              onChange={(e) =>
+                                updateVehicle(veh.id, { capacity: parseFloat(e.target.value) || 0 })
+                              }
+                              style={{
+                                width: '60px',
+                                padding: '0.15rem 0.35rem',
+                                borderRadius: '4px',
+                                border: '1px solid var(--border-subtle)',
+                                background: 'var(--bg-elevated)',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.75rem',
+                                fontFamily: 'var(--font-mono)',
+                                textAlign: 'right',
+                              }}
+                              aria-label={`Capacity for ${veh.id}`}
+                            />
+                            <span style={{ color: 'var(--text-tertiary)' }}>kg</span>
+                          </div>
+
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer', margin: 0 }}>
+                            <input
+                              type="checkbox"
+                              checked={veh.available !== false}
+                              onChange={(e) => updateVehicle(veh.id, { available: e.target.checked })}
+                              style={{ accentColor: 'var(--cyan-core)', cursor: 'pointer' }}
+                            />
+                            <span style={{ fontSize: '0.7rem', color: veh.available !== false ? '#34d399' : '#f87171' }}>
+                              {veh.available !== false ? 'Active' : 'Idle'}
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -1541,9 +1782,15 @@ export default function ScenarioLab() {
                     background: 'var(--bg-elevated)',
                     padding: '0.55rem 0.75rem',
                     borderRadius: '6px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                   }}
                 >
-                  <b>Future-Ready Data Model:</b> Fleet parameters will be fed into the multi-vehicle routing solver.
+                  <span><b>Single Source of Truth:</b> Fleet configurations auto-persist to SQLite and feed directly into PSO/QPSO solver.</span>
+                  <Badge variant={dbSyncStatus === 'synced' ? 'success' : 'amber'}>
+                    {dbSyncStatus === 'synced' ? 'Persistent' : 'Saving...'}
+                  </Badge>
                 </div>
               </div>
             )}
@@ -1576,10 +1823,15 @@ export default function ScenarioLab() {
                 </span>
               </div>
               <button
+                id="toggle-presets-btn"
                 type="button"
                 className="btn btn-secondary btn-sm"
                 style={{ padding: '0.2rem 0.5rem', border: 'none' }}
                 aria-label="Toggle scenario presets"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsPresetsExpanded(!isPresetsExpanded);
+                }}
               >
                 {isPresetsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
@@ -1599,6 +1851,7 @@ export default function ScenarioLab() {
                   return (
                     <div
                       key={preset.id}
+                      id={`preset-${preset.id}`}
                       onClick={() => loadPreset(preset.id)}
                       style={{
                         padding: '0.65rem 0.85rem',

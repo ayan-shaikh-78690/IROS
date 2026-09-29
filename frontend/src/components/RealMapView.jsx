@@ -19,6 +19,16 @@ import { useScenario, INDIAN_CITIES } from '../context/ScenarioContext';
 import { useTheme } from '../context/ThemeContext';
 import { ACTIVE_MAP_PROVIDER } from '../config/mapConfig';
 
+// Defensive check to prevent Leaflet _leaflet_pos error on unmounted elements
+if (typeof L !== 'undefined' && L.DomUtil && !L.DomUtil._patchedPosition) {
+  const originalGetPosition = L.DomUtil.getPosition;
+  L.DomUtil.getPosition = function (el) {
+    if (!el) return new L.Point(0, 0);
+    return originalGetPosition.call(this, el);
+  };
+  L.DomUtil._patchedPosition = true;
+}
+
 export default function RealMapView({ onMapClickModeChange }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -40,6 +50,9 @@ export default function RealMapView({ onMapClickModeChange }) {
     isRoutingLoading,
     routingError,
     calculateRoute,
+    optimizedRoutes,
+    activeRouteView,
+    setActiveRouteView,
   } = useScenario();
 
   const { isDark } = useTheme();
@@ -47,6 +60,7 @@ export default function RealMapView({ onMapClickModeChange }) {
   // Create or update Leaflet Map
   useEffect(() => {
     if (!mapContainerRef.current) return;
+    let initTimer = null;
 
     // Initialize Map if not already created
     if (!mapInstanceRef.current) {
@@ -93,17 +107,21 @@ export default function RealMapView({ onMapClickModeChange }) {
       });
 
       // Invalidate size immediately and after mount to prevent grey/clipped tiles
-      setTimeout(() => {
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.invalidateSize();
+      initTimer = setTimeout(() => {
+        if (mapInstanceRef.current && mapInstanceRef.current._container) {
+          try {
+            mapInstanceRef.current.invalidateSize();
+          } catch (_) {}
         }
       }, 150);
 
       // Observe size changes to ensure leaflet tiles never have blank tiles
       if (typeof ResizeObserver !== 'undefined' && mapContainerRef.current) {
         const ro = new ResizeObserver(() => {
-          if (mapInstanceRef.current) {
-            mapInstanceRef.current.invalidateSize();
+          if (mapInstanceRef.current && mapInstanceRef.current._container) {
+            try {
+              mapInstanceRef.current.invalidateSize();
+            } catch (_) {}
           }
         });
         ro.observe(mapContainerRef.current);
@@ -112,11 +130,17 @@ export default function RealMapView({ onMapClickModeChange }) {
     }
 
     return () => {
+      if (initTimer) clearTimeout(initTimer);
       if (mapInstanceRef.current) {
         if (mapInstanceRef.current._resizeObserver) {
           mapInstanceRef.current._resizeObserver.disconnect();
         }
-        mapInstanceRef.current.remove();
+        try {
+          mapInstanceRef.current.stop();
+        } catch (_) {}
+        try {
+          mapInstanceRef.current.remove();
+        } catch (_) {}
         mapInstanceRef.current = null;
       }
     };
@@ -141,16 +165,31 @@ export default function RealMapView({ onMapClickModeChange }) {
     });
   }, [mapFocusTarget]);
 
-  // Auto fit map bounds when real road route arrives
+  // Auto fit map bounds when real road route or optimized fleet routes arrive
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map || !currentRoute?.geometry?.coordinates?.length) return;
+    if (!map) return;
+
+    if (activeRouteView === 'optimized' && optimizedRoutes && optimizedRoutes.length > 0) {
+      const allCoords = [];
+      optimizedRoutes.forEach((r) => {
+        if (r.geometry?.coordinates?.length) {
+          r.geometry.coordinates.forEach(([lng, lat]) => allCoords.push([lat, lng]));
+        }
+      });
+      if (allCoords.length > 1) {
+        map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50], maxZoom: 15 });
+        return;
+      }
+    }
+
+    if (!currentRoute?.geometry?.coordinates?.length) return;
     const roadCoords = currentRoute.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
     if (roadCoords.length > 1) {
       const bounds = L.latLngBounds(roadCoords);
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
     }
-  }, [currentRoute]);
+  }, [currentRoute, optimizedRoutes, activeRouteView]);
 
   // Update container attribute for click mode
   useEffect(() => {
@@ -286,9 +325,93 @@ export default function RealMapView({ onMapClickModeChange }) {
       });
     }
 
-    // 3. Render REAL ROAD-FOLLOWING ROUTE (M2.2-A)
-    // Replaces straight lines with authentic street geometry returned by OSRM
-    if (
+    // 3. Render REAL ROAD-FOLLOWING ROUTES (M2.2-A / M3 / M4)
+    const VEHICLE_COLORS = [
+      { stroke: '#38bdf8', glow: 'rgba(56, 189, 248, 0.35)' }, // Cyan
+      { stroke: '#a855f7', glow: 'rgba(168, 85, 247, 0.35)' }, // Purple
+      { stroke: '#10b981', glow: 'rgba(16, 185, 129, 0.35)' }, // Emerald
+      { stroke: '#f59e0b', glow: 'rgba(245, 158, 11, 0.35)' }, // Amber
+      { stroke: '#ec4899', glow: 'rgba(236, 72, 153, 0.35)' }, // Pink
+    ];
+
+    if (activeRouteView === 'optimized' && optimizedRoutes && optimizedRoutes.length > 0) {
+      optimizedRoutes.forEach((route, idx) => {
+        if (!route.stops || route.stops.length === 0) return;
+        const colorSet = VEHICLE_COLORS[idx % VEHICLE_COLORS.length];
+        const vehCap = route.capacity_limit || route.vehicle_capacity || scenario.vehicleCapacity || 100;
+        const payload = route.total_demand_loaded != null ? route.total_demand_loaded : (route.payload_demand || 0);
+        const remaining = Math.max(0, vehCap - payload);
+        const utilPct = vehCap > 0 ? Math.round((payload / vehCap) * 100) : 0;
+        const isFeasible = (route.is_capacity_feasible ?? (payload <= vehCap)) && ((route.time_window_delays_s || route.time_window_violations || 0) === 0);
+        const distKm = (route.distance_m / 1000).toFixed(1);
+        const durMin = ((route.total_duration_s || route.duration_s || 0) / 60).toFixed(0);
+
+        if (route.geometry?.coordinates?.length > 1) {
+          const roadPath = route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+
+          L.polyline(roadPath, {
+            color: colorSet.glow,
+            weight: 8,
+            opacity: 0.85,
+            lineCap: 'round',
+            lineJoin: 'round',
+          }).addTo(polylineLayer);
+
+          const polyline = L.polyline(roadPath, {
+            color: colorSet.stroke,
+            weight: 4.5,
+            opacity: 0.95,
+            lineCap: 'round',
+            lineJoin: 'round',
+          }).addTo(polylineLayer);
+
+          polyline.bindTooltip(
+            `Vehicle ${route.vehicle_id}: ${route.stops.length} stops • ${distKm} km • ${durMin} min • ${utilPct}% cap (${isFeasible ? 'FEASIBLE' : 'PENALIZED'})`,
+            { sticky: true, className: 'iros-polyline-tooltip' }
+          );
+
+          polyline.bindPopup(`
+            <div class="iros-map-popup">
+              <div class="iros-popup-badge" style="background: ${colorSet.stroke}; color: #000; font-weight: 700;">
+                VEHICLE ${route.vehicle_id}
+              </div>
+              <h4 class="iros-popup-title">${route.vehicle_name || `Fleet ${route.vehicle_type?.toUpperCase() || 'VAN'}`}</h4>
+              <div class="iros-popup-meta">
+                <div><span>Payload Capacity:</span> <b>${vehCap} kg</b></div>
+                <div><span>Assigned Demand:</span> <b>${payload} kg</b></div>
+                <div><span>Remaining Space:</span> <b>${remaining} kg</b></div>
+                <div><span>Capacity Utilization:</span> <b>${utilPct}%</b></div>
+                <div><span>Customers Served:</span> <b>${route.stops.length} stops</b></div>
+                <div><span>Road Distance:</span> <b>${distKm} km</b></div>
+                <div><span>Route Duration:</span> <b>${durMin} min</b></div>
+                <div><span>Feasibility Status:</span> <b style="color: ${isFeasible ? '#34d399' : '#fbbf24'};">${isFeasible ? 'FEASIBLE' : 'PENALIZED'}</b></div>
+              </div>
+            </div>
+          `);
+        } else {
+          const pts = [];
+          if (scenario.depot?.lat && scenario.depot?.lng) {
+            pts.push([scenario.depot.lat, scenario.depot.lng]);
+          }
+          const custMap = new Map(scenario.customers.map((c) => [c.id, c]));
+          route.stops.forEach((sid) => {
+            const cust = custMap.get(sid);
+            if (cust?.lat && cust?.lng) pts.push([cust.lat, cust.lng]);
+          });
+          if (scenario.depot?.lat && scenario.depot?.lng && pts.length > 1) {
+            pts.push([scenario.depot.lat, scenario.depot.lng]);
+          }
+          if (pts.length > 1) {
+            L.polyline(pts, {
+              color: colorSet.stroke,
+              weight: 3.5,
+              opacity: 0.9,
+              dashArray: '6, 6',
+            }).addTo(polylineLayer);
+          }
+        }
+      });
+    } else if (
       currentRoute &&
       currentRoute.geometry &&
       currentRoute.geometry.coordinates &&
@@ -338,7 +461,7 @@ export default function RealMapView({ onMapClickModeChange }) {
         lineJoin: 'round',
       }).addTo(polylineLayer);
     }
-  }, [scenario.depot, scenario.customers, currentRoute, isDark]);
+  }, [scenario.depot, scenario.customers, currentRoute, optimizedRoutes, activeRouteView, isDark]);
 
   // Map Navigation Functions
   const handleZoomIn = () => mapInstanceRef.current?.zoomIn();
@@ -363,6 +486,19 @@ export default function RealMapView({ onMapClickModeChange }) {
   const handleFitBounds = () => {
     const map = mapInstanceRef.current;
     if (!map) return;
+
+    if (activeRouteView === 'optimized' && optimizedRoutes && optimizedRoutes.length > 0) {
+      const allCoords = [];
+      optimizedRoutes.forEach((r) => {
+        if (r.geometry?.coordinates?.length) {
+          r.geometry.coordinates.forEach(([lng, lat]) => allCoords.push([lat, lng]));
+        }
+      });
+      if (allCoords.length > 1) {
+        map.fitBounds(L.latLngBounds(allCoords), { padding: [50, 50], maxZoom: 15, duration: 1.0 });
+        return;
+      }
+    }
 
     if (currentRoute?.geometry?.coordinates?.length > 1) {
       const roadCoords = currentRoute.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
@@ -419,6 +555,23 @@ export default function RealMapView({ onMapClickModeChange }) {
 
         {/* View Presets & Calculate Route Buttons */}
         <div className="iros-map-actions">
+          {/* Toggle between single road sequence and multi-vehicle optimized tours */}
+          {optimizedRoutes && optimizedRoutes.length > 0 && (
+            <button
+              type="button"
+              className={`iros-action-pill ${activeRouteView === 'optimized' ? 'active' : ''}`}
+              onClick={() => setActiveRouteView(activeRouteView === 'optimized' ? 'road' : 'optimized')}
+              title="Toggle between single road sequence and multi-vehicle optimized tours"
+              style={{
+                borderColor: activeRouteView === 'optimized' ? 'var(--cyan-bright)' : undefined,
+                color: activeRouteView === 'optimized' ? 'var(--cyan-bright)' : undefined,
+              }}
+            >
+              <Layers size={13} />
+              <span>{activeRouteView === 'optimized' ? 'Fleet Tours' : 'Single Road'}</span>
+            </button>
+          )}
+
           <button
             type="button"
             className="iros-action-pill"
@@ -471,6 +624,10 @@ export default function RealMapView({ onMapClickModeChange }) {
         <span className="pulse-indicator"></span>
         {isRoutingLoading ? (
           <span>Calculating real road route via OpenStreetMap (OSRM)...</span>
+        ) : activeRouteView === 'optimized' && optimizedRoutes ? (
+          <span>
+            <b>Optimized Multi-Vehicle Fleet:</b> Rendering {optimizedRoutes.filter((r) => r.stops?.length > 0).length} color-coded vehicle tours generated by discrete metaheuristic optimizer.
+          </span>
         ) : currentRoute ? (
           <span>
             <b>Road Route:</b> {currentRoute.total_distance_km} km • {currentRoute.total_duration_min} min • {currentRoute.legs.length} legs via real streets.
@@ -510,27 +667,58 @@ export default function RealMapView({ onMapClickModeChange }) {
 
       {/* Sequence Ribbon Indicator at the bottom */}
       <div className="iros-map-sequence-ribbon">
-        <span className="ribbon-label">Dispatch Sequence:</span>
+        <span className="ribbon-label">
+          {activeRouteView === 'optimized' && optimizedRoutes ? 'Fleet Dispatch:' : 'Dispatch Sequence:'}
+        </span>
         <div className="ribbon-chain">
-          <span className="ribbon-node depot">DEPOT</span>
-          {scenario.customers.length === 0 ? (
-            <span className="ribbon-empty">→ Click map to place Stop 1</span>
+          {activeRouteView === 'optimized' && optimizedRoutes ? (
+            optimizedRoutes
+              .filter((r) => r.stops && r.stops.length > 0)
+              .map((r, idx) => {
+                const colors = ['#38bdf8', '#a855f7', '#10b981', '#f59e0b', '#ec4899'];
+                const c = colors[idx % colors.length];
+                return (
+                  <span
+                    key={r.vehicle_id}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: '4px',
+                      background: 'rgba(255,255,255,0.06)',
+                      borderLeft: `3px solid ${c}`,
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.725rem',
+                    }}
+                  >
+                    <b>Veh {r.vehicle_id}:</b> {r.stops.length} stops ({r.payload_demand} units)
+                  </span>
+                );
+              })
           ) : (
-            scenario.customers.map((c, i) => (
-              <React.Fragment key={c.id}>
-                <span className="ribbon-arrow">→</span>
-                <span className="ribbon-node stop" title={c.name}>Stop {i + 1}</span>
-              </React.Fragment>
-            ))
-          )}
-          {scenario.customers.length > 0 && (
             <>
-              <span className="ribbon-arrow">→</span>
-              <span className="ribbon-node return">Return Hub</span>
+              <span className="ribbon-node depot">DEPOT</span>
+              {scenario.customers.length === 0 ? (
+                <span className="ribbon-empty">→ Click map to place Stop 1</span>
+              ) : (
+                scenario.customers.map((c, i) => (
+                  <React.Fragment key={c.id}>
+                    <span className="ribbon-arrow">→</span>
+                    <span className="ribbon-node stop" title={c.name}>Stop {i + 1}</span>
+                  </React.Fragment>
+                ))
+              )}
+              {scenario.customers.length > 0 && (
+                <>
+                  <span className="ribbon-arrow">→</span>
+                  <span className="ribbon-node return">Return Hub</span>
+                </>
+              )}
             </>
           )}
         </div>
-        {currentRoute && (
+        {activeRouteView !== 'optimized' && currentRoute && (
           <span
             style={{
               marginLeft: 'auto',

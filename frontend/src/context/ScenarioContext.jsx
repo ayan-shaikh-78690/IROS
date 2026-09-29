@@ -1,5 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { fetchHealth, calculateRoadRoute, fetchVrpMatrix, evaluateVrpSolution } from '../services/api';
+import {
+  fetchHealth,
+  calculateRoadRoute,
+  fetchVrpMatrix,
+  evaluateVrpSolution,
+  fetchScenarios,
+  fetchScenarioById,
+  saveScenarioApi,
+  updateScenarioApi,
+  deleteScenarioApi,
+  calculateScenarioBaseline,
+  fetchScenarioLatestRun,
+} from '../services/api';
 
 const ScenarioContext = createContext();
 
@@ -36,6 +48,20 @@ export const VEHICLE_TYPES = {
     icon: 'Container',
   },
 };
+
+export function buildFleetArray(numVehicles, vehicleCapacity, vehicleType = 'van') {
+  const count = Math.max(1, parseInt(numVehicles, 10) || 1);
+  const cap = Number(vehicleCapacity) || 120;
+  return Array.from({ length: count }, (_, i) => ({
+    id: `VEH-${String(i + 1).padStart(2, '0')}`,
+    name: `Fleet ${vehicleType.toUpperCase()} ${i + 1}`,
+    vehicle_type: vehicleType,
+    vehicleType: vehicleType,
+    capacity: cap,
+    available: true,
+    speed_factor: 1.0,
+  }));
+}
 
 // Indian Cities Configuration (Section 2: India -> State/City -> Specific delivery area)
 export const INDIAN_CITIES = [
@@ -149,6 +175,7 @@ export const SCENARIO_PRESETS = [
     vehicleType: 'van',
     numVehicles: 3,
     vehicleCapacity: 120,
+    vehicles: buildFleetArray(3, 120, 'van'),
     weights: { distance: 0.3, travelTime: 0.45, congestion: 0.25 },
     depot: {
       lat: 23.0338,
@@ -170,6 +197,7 @@ export const SCENARIO_PRESETS = [
     vehicleType: 'bike',
     numVehicles: 4,
     vehicleCapacity: 35,
+    vehicles: buildFleetArray(4, 35, 'bike'),
     weights: { distance: 0.25, travelTime: 0.55, congestion: 0.2 },
     depot: {
       lat: 23.0280,
@@ -190,6 +218,7 @@ export const SCENARIO_PRESETS = [
     vehicleType: 'van',
     numVehicles: 2,
     vehicleCapacity: 150,
+    vehicles: buildFleetArray(2, 150, 'van'),
     weights: { distance: 0.4, travelTime: 0.4, congestion: 0.2 },
     depot: {
       lat: 23.1915,
@@ -210,6 +239,7 @@ export const SCENARIO_PRESETS = [
     vehicleType: 'truck',
     numVehicles: 3,
     vehicleCapacity: 300,
+    vehicles: buildFleetArray(3, 300, 'truck'),
     weights: { distance: 0.5, travelTime: 0.3, congestion: 0.2 },
     depot: {
       lat: 23.0850,
@@ -221,6 +251,44 @@ export const SCENARIO_PRESETS = [
       { id: 'CUST-002', lat: 22.9860, lng: 72.4980, demand: 110, earliestArrival: '10:00', latestArrival: '15:00', name: 'Sanand Industrial Cluster' },
       { id: 'CUST-003', lat: 23.1340, lng: 72.5890, demand: 80, earliestArrival: '12:00', latestArrival: '17:00', name: 'Chandkheda Bulk Depot' },
       { id: 'CUST-004', lat: 23.0150, lng: 72.6320, demand: 75, earliestArrival: '14:00', latestArrival: '18:00', name: 'Narol Textile Gateway' },
+    ],
+  },
+  {
+    id: 'sih-metropolitan-20',
+    name: 'Ahmedabad Metropolitan Logistics (20 Stops • 3 Vehicles)',
+    description: 'SIH 2026 20-customer benchmark across Ahmedabad commercial centers, residential nodes, and transport corridors.',
+    region: 'Ahmedabad–Gandhinagar, Gujarat, India',
+    vehicleType: 'van',
+    numVehicles: 3,
+    vehicleCapacity: 120,
+    vehicles: buildFleetArray(3, 120, 'van'),
+    weights: { distance: 0.35, travelTime: 0.45, congestion: 0.2 },
+    depot: {
+      lat: 23.0338,
+      lng: 72.5850,
+      name: 'Ashram Road Central Distribution Hub',
+    },
+    customers: [
+      { id: 'CUST-001', lat: 23.0305, lng: 72.5178, demand: 18, earliestArrival: '09:00', latestArrival: '12:00', name: 'SG Highway Trade Center' },
+      { id: 'CUST-002', lat: 23.0373, lng: 72.5524, demand: 14, earliestArrival: '09:30', latestArrival: '12:30', name: 'Navrangpura Commercial Complex' },
+      { id: 'CUST-003', lat: 23.0225, lng: 72.5714, demand: 20, earliestArrival: '10:00', latestArrival: '13:00', name: 'Paldi Business Hub' },
+      { id: 'CUST-004', lat: 23.0544, lng: 72.5312, demand: 16, earliestArrival: '10:30', latestArrival: '14:00', name: 'Vastrapur Innovation Park' },
+      { id: 'CUST-005', lat: 23.0135, lng: 72.5298, demand: 22, earliestArrival: '11:00', latestArrival: '14:30', name: 'Prahlad Nagar Corporate Road' },
+      { id: 'CUST-006', lat: 23.0610, lng: 72.5020, demand: 12, earliestArrival: '09:15', latestArrival: '12:45', name: 'Thaltej Shilaj Corridor' },
+      { id: 'CUST-007', lat: 23.0410, lng: 72.5680, demand: 15, earliestArrival: '09:45', latestArrival: '13:15', name: 'Usmanpura Cross Roads' },
+      { id: 'CUST-008', lat: 23.0780, lng: 72.5280, demand: 18, earliestArrival: '11:30', latestArrival: '15:00', name: 'Gota SG Junction' },
+      { id: 'CUST-009', lat: 23.0950, lng: 72.5950, demand: 25, earliestArrival: '10:15', latestArrival: '14:00', name: 'Sabarmati Railway Terminal' },
+      { id: 'CUST-010', lat: 23.1120, lng: 72.5850, demand: 19, earliestArrival: '12:00', latestArrival: '16:00', name: 'Chandkheda Central Point' },
+      { id: 'CUST-011', lat: 23.0480, lng: 72.6020, demand: 14, earliestArrival: '11:00', latestArrival: '15:30', name: 'Shahibaug Riverfront Gate' },
+      { id: 'CUST-012', lat: 23.0110, lng: 72.5980, demand: 21, earliestArrival: '13:00', latestArrival: '17:00', name: 'Kankaria Lakefront Logistics' },
+      { id: 'CUST-013', lat: 22.9980, lng: 72.6080, demand: 17, earliestArrival: '13:30', latestArrival: '17:30', name: 'Maninagar Commercial Market' },
+      { id: 'CUST-014', lat: 23.0210, lng: 72.5620, demand: 13, earliestArrival: '09:00', latestArrival: '12:00', name: 'Ellisbridge Post Hub' },
+      { id: 'CUST-015', lat: 23.0400, lng: 72.5350, demand: 16, earliestArrival: '10:00', latestArrival: '14:00', name: 'Drive-in Road Retail Belt' },
+      { id: 'CUST-016', lat: 23.0680, lng: 72.5580, demand: 20, earliestArrival: '11:15', latestArrival: '15:45', name: 'Ranip Transit Hub' },
+      { id: 'CUST-017', lat: 23.0050, lng: 72.5450, demand: 15, earliestArrival: '12:30', latestArrival: '16:30', name: 'Vasna APMC Market' },
+      { id: 'CUST-018', lat: 23.0250, lng: 72.5080, demand: 18, earliestArrival: '13:00', latestArrival: '17:00', name: 'South Bopal Ring Road' },
+      { id: 'CUST-019', lat: 23.0380, lng: 72.4880, demand: 14, earliestArrival: '14:00', latestArrival: '18:00', name: 'Shela Commercial Zone' },
+      { id: 'CUST-020', lat: 23.0720, lng: 72.5120, demand: 22, earliestArrival: '14:30', latestArrival: '18:30', name: 'Science City Road Gateway' },
     ],
   },
 ];
@@ -242,18 +310,25 @@ export function ScenarioProvider({ children }) {
   const [scenario, setScenario] = useState({
     ...DEFAULT_SCENARIO,
     vehicleType: DEFAULT_SCENARIO.vehicleType || 'van',
+    vehicles: DEFAULT_SCENARIO.vehicles || buildFleetArray(3, 120, 'van'),
     roadRules: {
       allowOneWayOnly: true,
       avoidClosedRoads: true,
       enforceTruckWeightLimits: true,
     },
-    dynamicRerouting: false, // Traffic changes -> route is recalculated preview
+    dynamicRerouting: false,
   });
 
   const [activePresetId, setActivePresetId] = useState(DEFAULT_SCENARIO.id);
   const [optimizationSettings, setOptimizationSettings] = useState(INITIAL_OPT_SETTINGS);
   const [optimizationResults, setOptimizationResults] = useState(null);
+  const [beforeOptimizationMetrics, setBeforeOptimizationMetrics] = useState(null);
+  const [optimizedRoutes, setOptimizedRoutes] = useState(null);
+  const [activeRouteView, setActiveRouteView] = useState('road'); // 'road' | 'optimized'
   const [backendHealth, setBackendHealth] = useState({ status: 'checking', service: null });
+  const [isSyncingToDb, setIsSyncingToDb] = useState(false);
+  const [dbSyncStatus, setDbSyncStatus] = useState('synced'); // 'synced' | 'saving' | 'error'
+  const [playbackIteration, setPlaybackIteration] = useState(null); // Phase 15 telemetry playback
 
   // Check backend health periodically
   const checkHealth = async () => {
@@ -273,6 +348,8 @@ export function ScenarioProvider({ children }) {
   const [routingError, setRoutingError] = useState(null);
   const [isRoundTrip, setIsRoundTrip] = useState(true);
   const routeRequestIdRef = useRef(0);
+  const autoSaveTimerRef = useRef(null);
+  const hasHydratedRef = useRef(false);
 
   // Calculate real road route for scenario sequence (Depot -> Stop 1 -> ... -> Depot)
   const calculateRoute = useCallback(async (customScenario = null, customRoundTrip = null) => {
@@ -309,16 +386,14 @@ export function ScenarioProvider({ children }) {
         lat: Number(c.lat || c.latitude),
         lng: Number(c.lng || c.longitude),
         demand: c.demand != null ? Number(c.demand) : 15,
-        earliest_arrival: c.earliestArrival || '09:00',
-        latest_arrival: c.latestArrival || '12:00',
+        earliest_arrival: c.earliestArrival || c.earliest_arrival || '09:00',
+        latest_arrival: c.latestArrival || c.latest_arrival || '12:00',
       })),
       round_trip: roundTripVal,
     };
 
     try {
       const res = await calculateRoadRoute(payload);
-      // Stop edits can start another request before this one finishes. Only the
-      // newest scenario is allowed to update the displayed route or loading state.
       if (requestId !== routeRequestIdRef.current) return null;
 
       if (res && res.status === 'success') {
@@ -354,17 +429,25 @@ export function ScenarioProvider({ children }) {
     setVrpError(null);
 
     const roundTripVal = customRoundTrip !== null ? customRoundTrip : isRoundTrip;
-    const numVehicles = Math.max(1, sc.numVehicles || 2);
+    const numVehicles = Math.max(1, sc.vehicles?.length || sc.numVehicles || 2);
     const vehicleCapacity = Number(sc.vehicleCapacity) || 100;
     const vType = sc.vehicleType || 'van';
 
-    const vehicles = Array.from({ length: numVehicles }, (_, i) => ({
-      id: `VEH-${String(i + 1).padStart(2, '0')}`,
-      name: `Fleet ${vType.toUpperCase()} ${i + 1}`,
-      type: vType,
-      capacity: vehicleCapacity,
-      speed_factor: 1.0,
-    }));
+    const vehicles = sc.vehicles && sc.vehicles.length > 0
+      ? sc.vehicles.map((v, i) => ({
+          id: v.id || `VEH-${String(i + 1).padStart(2, '0')}`,
+          name: v.name || `Fleet ${vType.toUpperCase()} ${i + 1}`,
+          type: v.vehicle_type || v.vehicleType || vType,
+          capacity: Number(v.capacity) || vehicleCapacity,
+          speed_factor: Number(v.speed_factor) || 1.0,
+        }))
+      : Array.from({ length: numVehicles }, (_, i) => ({
+          id: `VEH-${String(i + 1).padStart(2, '0')}`,
+          name: `Fleet ${vType.toUpperCase()} ${i + 1}`,
+          type: vType,
+          capacity: vehicleCapacity,
+          speed_factor: 1.0,
+        }));
 
     const customers = sc.customers.map((c, i) => ({
       id: c.id || `CUST-${String(i + 1).padStart(3, '0')}`,
@@ -372,8 +455,8 @@ export function ScenarioProvider({ children }) {
       lat: Number(c.lat || c.latitude),
       lng: Number(c.lng || c.longitude),
       demand: c.demand != null ? Number(c.demand) : 15,
-      earliest_arrival: c.earliestArrival || '09:00',
-      latest_arrival: c.latestArrival || '12:00',
+      earliest_arrival: c.earliestArrival || c.earliest_arrival || '09:00',
+      latest_arrival: c.latestArrival || c.latest_arrival || '12:00',
       service_duration_s: c.serviceDurationS != null ? Number(c.serviceDurationS) : 300.0,
     }));
 
@@ -393,7 +476,6 @@ export function ScenarioProvider({ children }) {
       default_service_duration_s: 300.0,
     };
 
-    // Discrete multi-vehicle partition (balanced round-robin allocation)
     const candidate_partitions = Array.from({ length: numVehicles }, () => []);
     customers.forEach((c, idx) => {
       candidate_partitions[idx % numVehicles].push(c.id);
@@ -430,36 +512,246 @@ export function ScenarioProvider({ children }) {
     }
   }, [scenario, isRoundTrip]);
 
-  // Initial road route and VRP calculation for default Ahmedabad preset on mount
-  useEffect(() => {
+  // Phase 2 & 17: Hydrate authoritative scenario and latest optimization run from backend SQLite DB
+  const hydrateFromDb = useCallback(async () => {
+    if (hasHydratedRef.current) return;
+    hasHydratedRef.current = true;
+    try {
+      const storedScenarioId = localStorage.getItem('iros_active_scenario_id') || DEFAULT_SCENARIO.id;
+      const scRes = await fetchScenarioById(storedScenarioId);
+      if (scRes && scRes.scenario) {
+        const dbSc = scRes.scenario;
+        const vCount = dbSc.vehicles?.length || dbSc.numVehicles || 3;
+        const vCap = dbSc.vehicles?.[0]?.capacity || dbSc.vehicleCapacity || 120;
+        const vType = dbSc.vehicles?.[0]?.vehicle_type || dbSc.vehicleType || 'van';
+
+        const mappedScenario = {
+          ...dbSc,
+          vehicleType: vType,
+          numVehicles: vCount,
+          vehicleCapacity: vCap,
+          vehicles: dbSc.vehicles && dbSc.vehicles.length > 0 ? dbSc.vehicles : buildFleetArray(vCount, vCap, vType),
+          customers: (dbSc.customers || []).map((c) => ({
+            ...c,
+            lat: Number(c.lat != null ? c.lat : c.latitude),
+            lng: Number(c.lng != null ? c.lng : c.longitude),
+            earliestArrival: c.earliestArrival || c.earliest_arrival || '09:00',
+            latestArrival: c.latestArrival || c.latest_arrival || '12:00',
+          })),
+        };
+        setScenario(mappedScenario);
+        setActivePresetId(mappedScenario.id);
+
+        // Hydrate latest run if available
+        const runRes = await fetchScenarioLatestRun(mappedScenario.id);
+        if (runRes && runRes.run) {
+          setOptimizationResults(runRes.run);
+          if (runRes.run.routes_with_geometry?.length > 0) {
+            setOptimizedRoutes(runRes.run.routes_with_geometry);
+            setActiveRouteView('optimized');
+          } else if (runRes.run.decoded_routes?.length > 0) {
+            setOptimizedRoutes(runRes.run.decoded_routes);
+            setActiveRouteView('optimized');
+          }
+          if (runRes.run.before_optimization) {
+            setBeforeOptimizationMetrics(runRes.run.before_optimization);
+          }
+        }
+        calculateRoute(mappedScenario);
+        calculateVrpSolution(mappedScenario);
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend SQLite scenario hydration:', err.message);
+    }
+    // Fallback to default scenario
     calculateRoute(DEFAULT_SCENARIO);
     calculateVrpSolution(DEFAULT_SCENARIO);
-  }, []);
+  }, [calculateRoute, calculateVrpSolution]);
+
+  useEffect(() => {
+    hydrateFromDb();
+  }, [hydrateFromDb]);
+
+  // Phase 2: Save Scenario to Backend SQLite Database
+  const saveScenarioToDb = useCallback(async (customScenario = null) => {
+    const sc = customScenario || scenario;
+    setIsSyncingToDb(true);
+    setDbSyncStatus('saving');
+    try {
+      const res = await updateScenarioApi(sc.id, sc);
+      if (res && res.status === 'success') {
+        setDbSyncStatus('synced');
+        localStorage.setItem('iros_active_scenario_id', sc.id);
+        return res;
+      }
+      setDbSyncStatus('error');
+      return null;
+    } catch (err) {
+      setDbSyncStatus('error');
+      return null;
+    } finally {
+      setIsSyncingToDb(false);
+    }
+  }, [scenario]);
+
+  // Debounced auto-sync to backend SQLite database on scenario changes
+  useEffect(() => {
+    if (!scenario?.id) return;
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = setTimeout(() => {
+      saveScenarioToDb(scenario);
+    }, 700);
+    return () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+  }, [scenario.customers, scenario.depot, scenario.vehicles, scenario.numVehicles, scenario.vehicleCapacity, scenario.vehicleType]);
+
+  // Phase 3: Calculate & Persist Baseline
+  const calculateBaseline = useCallback(async (customScenario = null, customRoundTrip = null) => {
+    const sc = customScenario || scenario;
+    const roundTripVal = customRoundTrip !== null ? customRoundTrip : isRoundTrip;
+    try {
+      const res = await calculateScenarioBaseline(sc.id, { round_trip: roundTripVal });
+      if (res && res.status === 'success') {
+        if (res.baseline) {
+          setBeforeOptimizationMetrics(res.baseline);
+        }
+        if (res.route) {
+          setCurrentRoute(res.route);
+        }
+        return res;
+      }
+      return null;
+    } catch (err) {
+      console.warn('Error calculating scenario baseline:', err);
+      return null;
+    }
+  }, [scenario, isRoundTrip]);
 
   const loadPreset = (presetId) => {
     const preset = SCENARIO_PRESETS.find((p) => p.id === presetId);
     if (!preset) return;
     setActivePresetId(preset.id);
+    localStorage.setItem('iros_active_scenario_id', preset.id);
+
+    const vCount = preset.numVehicles || 3;
+    const vCap = preset.vehicleCapacity || 120;
+    const vType = preset.vehicleType || 'van';
+    const fleet = preset.vehicles || buildFleetArray(vCount, vCap, vType);
+
     const updated = {
       ...scenario,
+      id: preset.id,
       name: preset.name,
       region: preset.region,
-      vehicleType: preset.vehicleType,
-      numVehicles: preset.numVehicles,
-      vehicleCapacity: preset.vehicleCapacity,
+      vehicleType: vType,
+      numVehicles: vCount,
+      vehicleCapacity: vCap,
+      vehicles: fleet.map((v) => ({ ...v })),
       weights: { ...preset.weights },
       depot: { ...preset.depot },
       customers: preset.customers.map((c) => ({ ...c })),
     };
     setScenario(updated);
     setOptimizationResults(null);
+    setBeforeOptimizationMetrics(null);
+    setOptimizedRoutes(null);
+    setActiveRouteView('road');
     calculateRoute(updated);
     calculateVrpSolution(updated);
+    saveScenarioToDb(updated);
   };
 
   const updateScenario = (updates) => {
-    setScenario((prev) => ({ ...prev, ...updates }));
-    setActivePresetId('custom');
+    setScenario((prev) => {
+      const next = { ...prev, ...updates };
+      return next;
+    });
+  };
+
+  // Phase 11: Single Source of Truth Fleet Synchronization
+  const setVehicleCount = (count) => {
+    const newCount = Math.max(1, parseInt(count, 10) || 1);
+    setScenario((prev) => {
+      const curVehicles = prev.vehicles || [];
+      const vType = prev.vehicleType || 'van';
+      const cap = Number(prev.vehicleCapacity) || 120;
+      let nextVehicles;
+      if (newCount > curVehicles.length) {
+        const added = Array.from({ length: newCount - curVehicles.length }, (_, i) => ({
+          id: `VEH-${String(curVehicles.length + i + 1).padStart(2, '0')}`,
+          name: `Fleet ${vType.toUpperCase()} ${curVehicles.length + i + 1}`,
+          vehicle_type: vType,
+          vehicleType: vType,
+          capacity: cap,
+          available: true,
+          speed_factor: 1.0,
+        }));
+        nextVehicles = [...curVehicles, ...added];
+      } else {
+        nextVehicles = curVehicles.slice(0, newCount);
+      }
+      return {
+        ...prev,
+        numVehicles: newCount,
+        vehicles: nextVehicles,
+      };
+    });
+  };
+
+  const setFleetCapacity = (capacity) => {
+    const newCap = Math.max(1, Number(capacity) || 1);
+    setScenario((prev) => ({
+      ...prev,
+      vehicleCapacity: newCap,
+      vehicles: (prev.vehicles || []).map((v) => ({ ...v, capacity: newCap })),
+    }));
+  };
+
+  const updateVehicle = (vehicleId, updates) => {
+    setScenario((prev) => {
+      const updatedVehicles = (prev.vehicles || []).map((v) =>
+        v.id === vehicleId ? { ...v, ...updates } : v
+      );
+      return {
+        ...prev,
+        vehicles: updatedVehicles,
+      };
+    });
+  };
+
+  const addVehicle = (vehicleData) => {
+    setScenario((prev) => {
+      const cur = prev.vehicles || [];
+      const nextId = `VEH-${String(cur.length + 1).padStart(2, '0')}`;
+      const newVeh = {
+        id: vehicleData?.id || nextId,
+        name: vehicleData?.name || `Fleet ${(prev.vehicleType || 'van').toUpperCase()} ${cur.length + 1}`,
+        vehicle_type: vehicleData?.vehicle_type || prev.vehicleType || 'van',
+        capacity: Number(vehicleData?.capacity || prev.vehicleCapacity || 120),
+        available: vehicleData?.available ?? true,
+        speed_factor: 1.0,
+      };
+      return {
+        ...prev,
+        numVehicles: cur.length + 1,
+        vehicles: [...cur, newVeh],
+      };
+    });
+  };
+
+  const removeVehicle = (vehicleId) => {
+    setScenario((prev) => {
+      const cur = prev.vehicles || [];
+      if (cur.length <= 1) return prev; // Minimum 1 vehicle required
+      const nextVehicles = cur.filter((v) => v.id !== vehicleId);
+      return {
+        ...prev,
+        numVehicles: nextVehicles.length,
+        vehicles: nextVehicles,
+      };
+    });
   };
 
   const setVehicleType = (typeKey) => {
@@ -468,6 +760,12 @@ export function ScenarioProvider({ children }) {
       ...prev,
       vehicleType: vType.id,
       vehicleCapacity: vType.defaultCapacity,
+      vehicles: (prev.vehicles || []).map((v) => ({
+        ...v,
+        vehicle_type: vType.id,
+        vehicleType: vType.id,
+        capacity: vType.defaultCapacity,
+      })),
     }));
   };
 
@@ -492,7 +790,6 @@ export function ScenarioProvider({ children }) {
       const newId = customerData?.id && !usedIds.has(customerData.id)
         ? customerData.id
         : generatedId;
-      // Slightly jitter new stop near depot if no coords passed
       const baseLat = prev.depot?.lat || 23.0300;
       const baseLng = prev.depot?.lng || 72.5500;
       const angle = (nextNum * 47) % 360;
@@ -510,8 +807,8 @@ export function ScenarioProvider({ children }) {
         latitude: lat,
         longitude: lng,
         demand: customerData?.demand != null ? Number(customerData.demand) : 15,
-        earliestArrival: customerData?.earliestArrival || '09:00',
-        latestArrival: customerData?.latestArrival || '17:00',
+        earliestArrival: customerData?.earliestArrival || customerData?.earliest_arrival || '09:00',
+        latestArrival: customerData?.latestArrival || customerData?.latest_arrival || '17:00',
         name: customerData?.name || `Delivery Stop ${nextNum}`,
         type: 'delivery_stop',
       };
@@ -537,6 +834,8 @@ export function ScenarioProvider({ children }) {
           const updated = { ...c, [field]: value };
           if (field === 'lat') updated.latitude = Number(value);
           if (field === 'lng') updated.longitude = Number(value);
+          if (field === 'earliestArrival') updated.earliest_arrival = value;
+          if (field === 'latestArrival') updated.latest_arrival = value;
           return updated;
         }
         return c;
@@ -591,6 +890,7 @@ export function ScenarioProvider({ children }) {
       customers: [],
     }));
     setCurrentRoute(null);
+    setOptimizedRoutes(null);
     setRoutingError(null);
   };
 
@@ -601,12 +901,51 @@ export function ScenarioProvider({ children }) {
       customers: [],
     }));
     setCurrentRoute(null);
+    setOptimizedRoutes(null);
     setRoutingError(null);
   };
+
+  const validateScenario = useCallback((customScenario = null) => {
+    const sc = customScenario || scenario;
+    const errors = [];
+    if (!sc.depot || sc.depot.lat == null || sc.depot.lng == null) {
+      errors.push('Central Fleet Depot is missing. Please place a depot on the map or enter depot coordinates.');
+    }
+    if (!sc.customers || sc.customers.length === 0) {
+      errors.push('No delivery stops defined. Please add at least 1 delivery customer.');
+    }
+    const vehiclesList = sc.vehicles || [];
+    const numVehicles = vehiclesList.length > 0 ? vehiclesList.length : (Number(sc.numVehicles) || 0);
+    if (numVehicles < 1) {
+      errors.push('At least 1 fleet vehicle must be configured.');
+    }
+    const totalCapacity = vehiclesList.length > 0
+      ? vehiclesList.reduce((acc, v) => acc + (Number(v.capacity) || 0), 0)
+      : (numVehicles * (Number(sc.vehicleCapacity) || 0));
+    if (totalCapacity <= 0) {
+      errors.push('Total fleet capacity must be greater than zero.');
+    }
+    const totalDemand = (sc.customers || []).reduce((acc, c) => acc + (Number(c.demand) || 0), 0);
+    const isCapacityExceeded = totalDemand > totalCapacity;
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+      totalDemand,
+      totalCapacity,
+      isCapacityExceeded,
+      numStops: sc.customers?.length || 0,
+      numVehicles,
+      vehicleCapacity: vehiclesList.length > 0 ? vehiclesList[0].capacity : Number(sc.vehicleCapacity) || 0,
+    };
+  }, [scenario]);
 
   const resetScenario = () => {
     setSelectedCityId('ahmedabad');
     setMapClickMode('stop');
+    setOptimizedRoutes(null);
+    setBeforeOptimizationMetrics(null);
+    setActiveRouteView('road');
     loadPreset(DEFAULT_SCENARIO.id);
   };
 
@@ -622,8 +961,19 @@ export function ScenarioProvider({ children }) {
         setMapClickMode,
         loadPreset,
         setVehicleType,
+        setVehicleCount,
+        setFleetCapacity,
+        updateVehicle,
+        addVehicle,
+        removeVehicle,
         optimizationSettings,
         optimizationResults,
+        beforeOptimizationMetrics,
+        setBeforeOptimizationMetrics,
+        optimizedRoutes,
+        setOptimizedRoutes,
+        activeRouteView,
+        setActiveRouteView,
         backendHealth,
         checkHealth,
         updateScenario,
@@ -636,6 +986,7 @@ export function ScenarioProvider({ children }) {
         updateOptimizationSettings,
         setOptimizationResults,
         resetScenario,
+        validateScenario,
         mapFocusTarget,
         focusOnMap,
         currentRoute,
@@ -649,6 +1000,12 @@ export function ScenarioProvider({ children }) {
         isVrpLoading,
         vrpError,
         calculateVrpSolution,
+        saveScenarioToDb,
+        calculateBaseline,
+        isSyncingToDb,
+        dbSyncStatus,
+        playbackIteration,
+        setPlaybackIteration,
       }}
     >
       {children}

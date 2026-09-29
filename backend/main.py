@@ -18,6 +18,7 @@ from api.health import router as health_router
 from api.routes import router as routes_router
 from api.optimization import router as optimization_router
 from api.vrp import router as vrp_router
+from api.scenarios import router as scenarios_router
 
 app = FastAPI(
     title="IROS - Intelligent Route Optimization System",
@@ -42,6 +43,7 @@ app.include_router(health_router)
 app.include_router(routes_router, prefix="/api")
 app.include_router(optimization_router, prefix="/api")
 app.include_router(vrp_router, prefix="/api")
+app.include_router(scenarios_router, prefix="/api")
 
 @app.get("/")
 def root():

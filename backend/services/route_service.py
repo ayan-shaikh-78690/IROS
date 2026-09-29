@@ -8,6 +8,7 @@ Responsibilities:
 3. Compute pairwise cost matrices for discrete VRP / optimization foundation.
 4. Support configurable routing engines (OSRM default, extensible to self-hosted/custom).
 """
+import asyncio
 import logging
 import math
 from typing import List, Dict, Any, Optional
@@ -42,6 +43,20 @@ class RoutingService:
         self.provider = provider
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
+
+    async def _request_osrm(self, url: str) -> httpx.Response:
+        """Retry one transient network failure before allowing the normal fallback."""
+        for attempt in range(2):
+            try:
+                async with httpx.AsyncClient(timeout=self.timeout) as client:
+                    return await client.get(url, headers={"User-Agent": "VEDIORA-IROS/1.0"})
+            except httpx.TransportError:
+                if attempt == 1:
+                    raise
+                logger.warning("OSRM request failed transiently; retrying once.")
+                await asyncio.sleep(0.2)
+
+        raise RuntimeError("OSRM request did not produce a response")
 
     async def calculate_road_route(self, request: RouteRequest) -> RouteResponse:
         """
@@ -82,8 +97,7 @@ class RoutingService:
         url = f"{self.base_url}/route/v1/driving/{coords_str}?overview=full&geometries=geojson&steps=false"
 
         try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.get(url, headers={"User-Agent": "VEDIORA-IROS/1.0"})
+            response = await self._request_osrm(url)
 
             if response.status_code == 200:
                 data = response.json()
@@ -172,8 +186,7 @@ class RoutingService:
         url = f"{self.base_url}/table/v1/driving/{coords_str}?annotations=duration,distance"
 
         try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.get(url, headers={"User-Agent": "VEDIORA-IROS/1.0"})
+            response = await self._request_osrm(url)
 
             if response.status_code == 200:
                 data = response.json()
