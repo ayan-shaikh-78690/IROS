@@ -1,0 +1,42 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vediora-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - BACKEND_HOST=0.0.0.0
+      - BACKEND_PORT=8000
+      - OSM_REGION=Ahmedabad–Gandhinagar, Gujarat, India
+      - NETWORK_TYPE=drive
+      - CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:80,http://localhost:3000
+      - ROUTING_PROVIDER=OSRM
+      - ROUTING_BASE_URL=https://router.project-osrm.org
+      - ROUTING_TIMEOUT_SECONDS=10.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vediora-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_BACKEND_URL=http://localhost:8000
+
+networks:
+  default:
+    name: vediora-network
