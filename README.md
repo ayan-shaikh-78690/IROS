@@ -1,129 +1,267 @@
 <div align="center">
 
 # 🚦 IROS — VEDIORA
-### **Quantum-Inspired Intelligent Traffic Route Optimization System**
-*Real-Road, Multi-Vehicle, Constraint-Aware Transportation Optimization Platform*
 
-<p align="center">
-  <img src="https://img.shields.io/badge/SIH_2026-PS_26137-FF9933?style=for-the-badge&logo=india&logoColor=white" alt="Smart India Hackathon 2026">
-  <img src="https://img.shields.io/badge/Team_ID-120148-138808?style=for-the-badge" alt="Team ID 120148">
-  <img src="https://img.shields.io/badge/Team_Name-VEDIORA-000080?style=for-the-badge" alt="Team VEDIORA">
-  <img src="https://img.shields.io/badge/Category-Software-blue?style=for-the-badge" alt="Category Software">
-  <img src="https://img.shields.io/badge/Theme-Transportation_%26_Logistics-orange?style=for-the-badge" alt="Theme Transportation">
+### **Quantum-Inspired Intelligent Route Optimization System**
+
+**Multi-vehicle delivery planning · Real-road routing · Discrete PSO & QPSO**
+
+<p>
+  <a href="https://iros-chi.vercel.app"><img src="https://img.shields.io/badge/🚀_LIVE_DEMO-Open_IROS-2563EB?style=for-the-badge" alt="Open IROS live demo"></a>
+  <a href="https://iros-mipi.onrender.com/docs"><img src="https://img.shields.io/badge/📘_API_DOCS-FastAPI-009688?style=for-the-badge" alt="Open IROS API docs"></a>
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.11">
+<p>
+  <img src="https://img.shields.io/badge/SIH_2026-PS_26137-FF9933?style=for-the-badge" alt="SIH 2026 Problem Statement 26137">
+  <img src="https://img.shields.io/badge/TEAM-VEDIORA-000080?style=for-the-badge" alt="Team VEDIORA">
+  <img src="https://img.shields.io/badge/TEAM_ID-120148-138808?style=for-the-badge" alt="Team ID 120148">
+</p>
+
+<p>
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 19">
-  <img src="https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI">
   <img src="https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite 8">
-  <img src="https://img.shields.io/badge/OSRM_/_OSMnx-OpenStreetMap-7EBC6F?style=flat-square&logo=openstreetmap&logoColor=white" alt="OSRM OSMnx">
-  <img src="https://img.shields.io/badge/Docker-Supported-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.11">
+  <img src="https://img.shields.io/badge/FastAPI-API-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/Leaflet-Maps-199900?style=flat-square&logo=leaflet&logoColor=white" alt="Leaflet">
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker Compose">
 </p>
 
-[**Key Features**](#-key-features) • [**System Architecture**](#%EF%B8%8F-8-layer-system-architecture) • [**Algorithmic Model**](#-algorithmic--mathematical-foundation) • [**Competitive Matrix**](#-competitive-comparison) • [**API Reference**](#-api-reference) • [**Quickstart**](#-quickstart--setup-guide)
+**[Launch IROS](https://iros-chi.vercel.app) · [API documentation](https://iros-mipi.onrender.com/docs) · [Health check](https://iros-mipi.onrender.com/health) · [GitHub repository](https://github.com/ayan-shaikh-78690/IROS)**
+
+**Smart India Hackathon 2026 · Problem Statement 26137 · Team VEDIORA · Team ID 120148**
 
 </div>
 
 ---
 
 ## 📑 Table of Contents
+
 - [🚦 Project Overview](#-project-overview)
-- [🎯 Problem Statement](#-problem-statement)
-- [✨ Key Technical Features](#-key-technical-features)
-- [🏗️ 8-Layer System Architecture](#%EF%B8%8F-8-layer-system-architecture)
-- [🧠 Algorithmic & Mathematical Foundation](#-algorithmic--mathematical-foundation)
-- [📊 Competitive Comparison](#-competitive-comparison)
-- [🌟 Impact & Real-World Benefits](#-impact--real-world-benefits)
-- [💡 Real-World Use Cases](#-real-world-use-cases)
-- [🛠️ Technology Stack](#%EF%B8%8F-technology-stack)
+- [🎯 Problem and Solution](#-problem-and-solution)
+- [✨ Key Features](#-key-features)
+- [🗺️ Routing and Traffic Accuracy](#️-routing-and-traffic-accuracy)
+- [🏗️ System Architecture](#️-system-architecture)
+- [🧠 Algorithmic Foundation](#-algorithmic-foundation)
+- [📊 PSO vs QPSO](#-pso-vs-qpso)
+- [🌱 Evaluation and Potential Use Cases](#-evaluation-and-potential-use-cases)
+- [🛠️ Technology Stack](#️-technology-stack)
 - [📁 Repository Structure](#-repository-structure)
 - [🔌 API Reference](#-api-reference)
-- [🚀 Quickstart & Setup Guide](#-quickstart--setup-guide)
-- [🚧 Implementation Status & Roadmap](#-implementation-status--roadmap)
-- [📚 Scientific References](#-scientific-references)
+- [🚀 Quickstart](#-quickstart)
+- [🌐 Deployment](#-deployment)
+- [🧭 Milestones and Roadmap](#-milestones-and-roadmap)
+- [📚 References and Attribution](#-references-and-attribution)
 
 ---
 
 ## 🚦 Project Overview
 
-**IROS (Intelligent Route Optimization System)** by **Team VEDIORA (Team ID: 120148)** is a quantum-inspired transportation intelligence platform engineered for **Smart India Hackathon (SIH) 2026 — Problem Statement ID 26137**.
+**IROS (Intelligent Route Optimization System)** is a fleet-planning application developed by **Team VEDIORA** for **Smart India Hackathon 2026 — Problem Statement 26137**.
 
-Rather than relying on abstract Euclidean distances or simple point-to-point shortest paths, IROS models fleet routing as a **Capacity and Time-Window Constrained Multi-Vehicle Routing Problem (CVRPTW)** over **real-world directed road networks**. By pairing **OpenStreetMap (OSM)** road graph extractions (via `OSMnx` & `OSRM`) with a vectorized **Quantum-behaved Particle Swarm Optimization (QPSO)** engine, IROS computes feasible, fuel-efficient, and congestion-aware routes with zero external API query costs.
+IROS helps a planner build a delivery scenario, distribute customer stops among vehicles, and search for a useful visit order under vehicle capacity and time-window constraints. It combines real-road routing with discrete **Particle Swarm Optimization (PSO)** and **Quantum-behaved Particle Swarm Optimization (QPSO)** solvers, then records run metrics for inspection.
+
+The demonstration region is **Ahmedabad–Gandhinagar, Gujarat, India**. Users can also enter locations through the map or address input.
+
+> [!IMPORTANT]
+> **Traffic limitation:** The current system does not use live traffic data or simulate time-varying traffic. Its congestion objective term is a baseline proxy derived from route duration. A dynamic traffic model is future work.
+
+### At a glance
+
+| 🗺️ Road-aware | 🚚 Fleet-aware | 🧠 Two solvers | 📈 Inspectable runs |
+|---|---|---|---|
+| OSRM route geometry and pairwise costs | Depot, customer stops, multiple vehicles | Discrete PSO and QPSO | Fitness, feasibility, runtime, convergence history |
+
+---
+
+## 🎯 Problem and Solution
+
+Delivery planning is a **Vehicle Routing Problem (VRP)**. A fleet plan must assign stops to vehicles, choose each vehicle's visit order, respect payload limits, and meet customer time windows. The search space grows quickly as the number of stops increases.
+
+| Planning challenge | IROS approach |
+|---|---|
+| Assigning many stops across vehicles | Discrete multi-vehicle route representation and optimization |
+| Respecting vehicle payload limits | Capacity checks and violation penalties |
+| Meeting delivery windows | Arrival-time and service-duration evaluation |
+| Estimating road routes between locations | OSRM route and table requests using road-network data |
+| Understanding solver behavior | Per-run metrics, feasibility indicators, and convergence history |
+| Comparing optimization approaches | PSO and QPSO can be evaluated on the same scenario |
+
+### Typical workflow
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                       VEDIORA IROS ROUTING PIPELINE                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ 1. REAL-ROAD INTELLIGENCE │ OpenStreetMap + OSMnx + OSRM Road Distance/Time │
-│ 2. DYNAMIC CONGESTION     │ Speed, Flow, Density & Simulated Peak-Hour Traffic│
-│ 3. VRP FORMULATION        │ Depot + Fleet Capacities + Delivery Time-Windows│
-│ 4. QPSO SOLVER ENGINE     │ Quantum Delta Well Dynamics → Vectorized Search │
-│ 5. COMMAND CENTER UI      │ React 19 + Leaflet Interactive Telemetry        │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────┐    ┌──────────────────┐    ┌───────────────────┐
+│ Build a scenario   │ →  │ Get road costs   │ →  │ Run PSO or QPSO  │
+│ Depot, stops, fleet│    │ OSRM route/table│    │ Discrete VRP      │
+└────────────────────┘    └──────────────────┘    └─────────┬─────────┘
+                                                            │
+┌────────────────────┐    ┌──────────────────┐              │
+│ Review and compare │ ←  │ Save run data    │ ←────────────┘
+│ Routes + analytics │    │ SQLite           │
+└────────────────────┘    └──────────────────┘
 ```
 
 ---
 
-## 🎯 Problem Statement
+## ✨ Key Features
 
-Traditional commercial navigation services (like Google Maps or Mapbox) solve single-vehicle point-to-point navigation well, but fail at complex multi-vehicle logistics optimization:
+<details open>
+<summary><strong>🧩 Scenario Lab · Define the delivery problem</strong></summary>
+<br>
 
-| Logistics Challenge | Impact on Fleet Operations | IROS (VEDIORA) Solution |
-| :--- | :--- | :--- |
-| **Multi-Vehicle Fleet Routing** | High fuel consumption & idle fleet time | Multi-route partitioning & customer sequence assignment |
-| **Delivery Time-Windows** | Missed customer slots & operational penalties | Strict service interval tracking with dynamic penalty functions |
-| **Directed Road Topology** | One-way roads mean $d_{ij} \neq d_{ji}$ | OSRM / NetworkX directed graph matrix ingestion |
-| **Combinatorial Complexity** | Exponential $N!$ route search space | QPSO quantum tunneling to escape local minima traps |
-| **External API Dependencies** | Expensive per-query routing API costs | Fully offline-resilient local graph caching & zero API cost |
+- Select or enter a depot and delivery-stop locations.
+- Configure the vehicle fleet, capacities, customer demands, and time windows.
+- Use scenario presets or customize the scenario.
+- Save scenario, depot, stop, and fleet data in SQLite.
+
+</details>
+
+<details>
+<summary><strong>🗺️ Real-road routing · See routes on the map</strong></summary>
+<br>
+
+- Render interactive maps with Leaflet and OpenStreetMap tiles.
+- Request OSRM road-following geometry, distance, duration, and pairwise matrices.
+- Use a clearly labeled geometric fallback when the routing service is unavailable.
+
+</details>
+
+<details>
+<summary><strong>⚙️ Optimization Studio · Build a fleet plan</strong></summary>
+<br>
+
+- Run discrete PSO or QPSO with configurable population and iteration settings.
+- Inspect vehicle assignment, stop order, route geometry, fitness breakdown, and feasibility.
+- Review convergence and comparisons to the scenario's initial baseline.
+
+</details>
+
+<details>
+<summary><strong>🏟️ Algorithm Arena · Compare the solvers</strong></summary>
+<br>
+
+- Run PSO and QPSO on the same scenario and initial conditions.
+- Compare the measured fitness, runtime, feasibility, and convergence returned by the run.
+- View the corresponding fleet route plans.
+
+The comparison describes the runs performed; it does not claim that one algorithm always wins.
+
+</details>
+
+<details>
+<summary><strong>📊 Analytics · Inspect recorded results</strong></summary>
+<br>
+
+- Browse saved optimization runs and scenario history.
+- Review route metrics, constraint feasibility, vehicle utilization, and convergence history.
+- Inspect computed before/after measures for the selected scenario.
+
+</details>
+
+### Constraints represented in the solver
+
+| Constraint | Evaluation |
+|---|---|
+| Customer coverage | Check customer visits for omissions and duplicates |
+| Vehicle capacity | Compare assigned demand with each vehicle's capacity |
+| Time windows | Evaluate arrival against earliest/latest customer times |
+| Service duration | Include stop-handling time in route schedules |
+| Depot hours | Include depot opening and closing times in feasibility checks |
 
 ---
 
-## ✨ Key Technical Features
+## 🗺️ Routing and Traffic Accuracy
 
-- **🗺️ Real-Road Network Intelligence:** Extracts road geometries, intersections, bounds, and directional road-type capacities using `OSMnx` & `OSRM` with local GraphML caching for **50K+ road segments**.
-- **⚡ NumPy-Vectorized QPSO Engine:** Accelerates swarm evaluation using vectorized matrix computations, completing **50 iterations in under 350 ms**.
-- **🔀 Continuous-to-Discrete Corridor Mapping:** Maps continuous QPSO particle positions to K-shortest-path corridors to guarantee valid connected routes.
-- **🚚 Multi-Vehicle Capacity & Time-Window Constraints (CVRPTW):** Dynamic penalty function handling for vehicle load limits ($q_i \le Q_k$), delivery intervals ($a_i \le s_i \le b_i$), and single-visit coverage.
-- **🚥 Dynamic Traffic Awareness:** Simulates speed, flow, density, and peak-hour bottlenecks to adjust dynamic edge weights: $W = \alpha \cdot d + \beta \cdot t + \gamma \cdot c$.
-- **💻 Interactive Command Center:** React 19 + Leaflet/MapLibre dashboard featuring interactive scenario labs, route visualization, algorithm arena comparisons, and live metrics telemetry.
-- **🛡️ Offline-Resilient & Zero API Cost:** Functions completely on local road network datasets without requiring paid third-party routing subscriptions.
+The frontend uses **OpenStreetMap map tiles** through Leaflet. The backend calls the configured **OSRM HTTP service** for road-following routes and pairwise route matrices. The default routing endpoint is the public OSRM server.
+
+If OSRM is unavailable or cannot return a route, the backend can return a **geometric fallback** based on Haversine distance and a fixed assumed speed. The API marks this result as a fallback. It is an approximation, not a road route or verified travel-time estimate.
+
+| Capability | Current implementation status |
+|---|---|
+| OpenStreetMap map tiles | Used by the frontend |
+| OSRM route geometry and distance/duration matrices | Requested by the backend |
+| Haversine fallback | Implemented; approximation only |
+| Congestion objective term | Baseline proxy proportional to route duration |
+| Dynamic congestion / peak-hour simulation | Not implemented; traffic service is a placeholder |
+| Live traffic feed / automatic traffic rerouting | Not implemented |
+| OSMnx network download / local GraphML cache | Not implemented |
+
+IROS requires network access for normal OSRM routing and map tiles. It is **not** a fully offline routing system.
 
 ---
 
-## 🏗️ 8-Layer System Architecture
+## 🏗️ System Architecture
 
-IROS follows an 8-layer decoupled software architecture for maximum modularity and scalability:
+```mermaid
+flowchart LR
+    PL[Dispatcher] --> UI[React + Vite]
+    UI -->|Scenario and optimization requests| API[FastAPI]
+    UI -->|Map tiles| OSM[OpenStreetMap]
+    API -->|Route + table requests| OSRM[OSRM service]
+    API --> SVC[Scenario and VRP services]
+    SVC --> MODEL[Discrete VRP model]
+    MODEL --> PSO[Discrete PSO]
+    MODEL --> QPSO[Discrete QPSO]
+    PSO --> EVAL[Shared objective + constraints]
+    QPSO --> EVAL
+    EVAL --> DB[(SQLite)]
+    DB --> UI
+```
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ LAYER 8 — USER INTERFACE                                                    │
-│ React 19 + Leaflet Dashboard │ Scenario Lab │ Algorithm Arena │ Analytics   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ LAYER 7 — APPLICATION & API GATEWAY                                         │
-│ FastAPI REST Services (Health, Routes, VRP, Optimization) + Docker Container │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ LAYER 6 — OPTIMIZED ROUTE OUTPUT                                            │
-│ Vehicle Assignments │ Visit Sequences │ Travel Times │ Distance & Cost Metrics│
-├─────────────────────────────────────────────────────────────────────────────┤
-│ LAYER 5 — OPTIMIZATION ENGINE                                               │
-│ QPSO (Quantum Delta Potential Well) vs. Classical PSO & Genetic Algorithms │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ LAYER 4 — VRP FORMULATION & CONSTRAINTS                                     │
-│ Depot Definitions │ Customer Demands │ Time Windows │ Penalty Functions      │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ LAYER 3 — NETWORK GRAPH MODEL                                               │
-│ NetworkX Directed Weighted Graph (Nodes = Intersections, Edges = Roads)     │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ LAYER 2 — DATA INGESTION & ROUTING                                          │
-│ OSMnx GraphML Caching + OSRM Distance & Duration Matrix Generation          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ LAYER 1 — REAL-WORLD DATA                                                   │
-│ OpenStreetMap Road Network Data + Simulated Traffic Conditions              │
-└─────────────────────────────────────────────────────────────────────────────┘
+### Layer view
+
+| Layer | Responsibility | Main implementation |
+|---|---|---|
+| 1 · User experience | Scenario entry, maps, results, analytics | React, Vite, Leaflet |
+| 2 · API client | Send requests and present responses | Frontend API service |
+| 3 · Application API | Health, routing, VRP, scenarios, optimization | FastAPI routers |
+| 4 · Routing integration | Road route geometry and pairwise costs | OSRM HTTP client |
+| 5 · VRP model | Discrete route encoding and feasibility | VRP models, encoder, constraint evaluator |
+| 6 · Search and objective | PSO/QPSO run, cost, convergence telemetry | Optimization modules |
+| 7 · Persistence | Scenario, fleet, stop, run, result, and route records | SQLite |
+| 8 · External map services | Basemap, routing, optional address lookup | OpenStreetMap, OSRM, Nominatim |
+
+### Optimization flow
+
+```mermaid
+flowchart TD
+    A[Depot + customer stops + fleet] --> B[OSRM distance/duration matrix]
+    B --> C[Discrete route encoding]
+    C --> D{Solver choice}
+    D -->|PSO| E[Swap-sequence updates]
+    D -->|QPSO| F[Mean-best consensus + stochastic mutations]
+    E --> G[Shared objective and constraint evaluation]
+    F --> G
+    G --> H[Routes + feasibility + run metrics]
+    H --> I[Convergence history + SQLite persistence]
+    I --> J[Studio · Arena · Analytics]
 ```
 
 ---
+
+## 🧠 Algorithmic Foundation
+
+### Discrete multi-vehicle VRP
+
+Each candidate solution stores customer order and vehicle partitions as discrete routes. The solver's repair logic keeps customer coverage valid as route candidates are transformed. Route distance and duration are obtained from the routing matrix, then feasibility and penalties are evaluated for the fleet plan.
+
+### Shared multi-objective evaluation
+
+At a high level, the fitness score combines weighted distance and duration costs, a congestion proxy, and constraint penalties:
+
+```text
+Fitness = distance cost + duration cost + congestion proxy + constraint penalties
+```
+
+The congestion component is currently derived from total route duration using a baseline factor. It is **not** an independently measured traffic condition. Results also preserve raw metrics and constraint outcomes, rather than reporting only a single score.
+
+### Quantum-inspired search
+
+The QPSO implementation adapts quantum-behaved search ideas to the discrete route space. It forms a mean-best edge-frequency consensus and local attractors from personal/global best candidates, then uses stochastic permutation changes controlled by a contraction/expansion parameter.
+
+> **QPSO is quantum-inspired software.** It does not use a quantum computer or quantum hardware.
+
+---
+
 
 ## 🧠 Algorithmic & Mathematical Foundation
 
@@ -169,35 +307,58 @@ $$x_i^{t+1} = p_i \pm \beta \cdot \left| mbest - x_i^t \right| \cdot \ln\left(\f
 
 ---
 
-## 🌟 Impact & Real-World Benefits
+## 📊 PSO vs QPSO
 
-```text
-  [ Lower Fuel Costs ] ──► 20–25% reduction in fuel consumption & fleet mileage
-  [ Less Travel Delay] ──► 15–30% reduction in delivery delays & congestion bottlenecks
-  [ Emergency Response]──► 25–40% faster priority dispatch for emergency vehicles
-  [ Cleaner Cities ]   ──► 15–22.8% reduction in idling emissions & noise pollution
-  [ Efficient Freight ] ──► 10–20% increase in overall logistics transport efficiency
-```
+This table compares the **implemented search mechanisms**, not benchmark outcomes.
+
+| Aspect | Discrete PSO | Discrete QPSO |
+|---|---|---|
+| Route representation | Customer permutations and vehicle partitions | Customer permutations and vehicle partitions |
+| Search movement | Ordered swap-sequence velocity | Attractor-based stochastic permutation updates |
+| Search memory | Personal best and global best | Personal best, global best, and mean-best consensus |
+| Shared evaluation | Same objective and constraint evaluator | Same objective and constraint evaluator |
+| How IROS compares results | Run telemetry and convergence history | Run telemetry and convergence history |
+
+Actual results depend on the scenario, routing matrix, solver parameters, and random seed. The project does not claim a universal winner or fixed speed advantage.
 
 ---
 
-## 💡 Real-World Use Cases
+## 🌱 Evaluation and Potential Use Cases
 
-1. **📦 Urban Freight & Logistics:** Optimizes retail and e-commerce delivery routes under strict capacity, time-window, and traffic constraints.
-2. **🚑 Emergency Response Dispatch:** Provides dynamic congestion-aware priority routing for ambulances and emergency service vehicles.
-3. **🏙️ Municipal Traffic Planning:** Analyzes recurring traffic bottlenecks and congestion hotspots to assist city infrastructure planning.
+IROS records per-run values such as route distance, travel duration, fitness breakdown, constraint feasibility, runtime, vehicle assignments, and convergence history. These values support scenario-specific review. They are **not evidence of guaranteed real-world savings** by themselves.
+
+Potential areas to explore with a validated deployment include:
+
+- urban delivery and parcel-fleet planning;
+- retail distribution scenarios with delivery windows;
+- fleet planning exercises for municipal or campus services.
+
+Emergency response, live traffic adaptation, and city-wide traffic impact analysis are not current demonstrated capabilities.
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Domain | Technologies Used |
-| :--- | :--- |
-| **Frontend UI** | React 19, Vite 8, React Router DOM, Context API |
-| **Map & Visualization** | Leaflet, MapLibre GL, Lucide React Icons |
-| **Backend API Framework** | Python 3.11, FastAPI, Uvicorn, Pydantic 2, HTTPX |
-| **Graph & Routing Services** | `OSMnx`, `NetworkX`, OSRM (Open Source Routing Machine), `NumPy` |
-| **DevOps & Containers** | Docker, Docker Compose, Nginx (Frontend reverse proxy) |
+| Area | Technologies |
+|---|---|
+| Frontend | React 19, Vite 8, React Router |
+| Maps and UI | Leaflet, OpenStreetMap tiles, Lucide React |
+| Backend | Python 3.11, FastAPI, Uvicorn, Pydantic |
+| HTTP/configuration | HTTPX, Requests, python-dotenv |
+| Road routing | OSRM HTTP API |
+| Address lookup | Local landmark gazetteer; optional OpenStreetMap Nominatim |
+| Persistence | SQLite |
+| Containers/web serving | Docker, Docker Compose, Nginx |
+| Hosting | Vercel frontend, Render backend |
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Frontend-Vercel-000000?style=flat-square&logo=vercel&logoColor=white" alt="Vercel frontend">
+  <img src="https://img.shields.io/badge/Backend-Render-46E3B7?style=flat-square&logo=render&logoColor=black" alt="Render backend">
+  <img src="https://img.shields.io/badge/Database-SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/Routing-OSRM-2E7D32?style=flat-square" alt="OSRM routing">
+</p>
+
+> **Dependency accuracy:** OSMnx, NetworkX, NumPy, and MapLibre are not current backend/frontend dependencies. The OSM network-download module is a placeholder; IROS currently requests road routes and matrices from OSRM and does not load or cache local GraphML road networks.
 
 ---
 
@@ -206,106 +367,194 @@ $$x_i^{t+1} = p_i \pm \beta \cdot \left| mbest - x_i^t \right| \cdot \ln\left(\f
 ```text
 IROS/
 ├── backend/
-│   ├── api/                # FastAPI routers (health.py, routes.py, vrp.py, optimization.py)
-│   ├── models/             # Pydantic data schemas & VRP domain models
-│   ├── services/           # Route, VRP, OSMnx, & Traffic business logic
-│   ├── optimization/       # QPSO, PSO, Baseline & Constraint solvers
-│   ├── main.py             # FastAPI entry point
-│   ├── config.py           # Application settings & environment handling
-│   ├── requirements.txt    # Backend Python dependencies
-│   └── Dockerfile          # Backend container file
+│   ├── api/                 # Health, routing, VRP, scenario, and optimization endpoints
+│   ├── data/                # SQLite initialization and persistence
+│   ├── models/              # Request schemas and VRP domain models
+│   ├── optimization/        # PSO, QPSO, objective, constraints, discrete encoding
+│   ├── services/            # Routing, VRP, graph, OSM, and traffic service modules
+│   ├── config.py            # Backend settings
+│   ├── main.py              # FastAPI app entry point
+│   ├── requirements.txt
+│   └── Dockerfile
 ├── frontend/
 │   ├── src/
-│   │   ├── pages/          # Home, ScenarioLab, OptimizationStudio, AlgorithmArena, Analytics
-│   │   ├── components/     # Reusable maps, metrics, and navigation UI
-│   │   ├── context/        # Scenario context state
-│   │   └── services/       # API integration service
-│   ├── package.json        # Frontend Node.js configuration
-│   ├── nginx.conf          # Nginx production web server config
-│   └── Dockerfile          # Frontend container file
-├── docker-compose.yml      # Orchestration for full-stack deployment
-└── README.md               # System documentation
+│   │   ├── components/      # Reusable interface and map components
+│   │   ├── config/          # Map provider settings
+│   │   ├── context/         # Scenario and theme state
+│   │   ├── pages/           # Home, Scenario Lab, Studio, Arena, Analytics, and more
+│   │   ├── services/        # Backend API client
+│   │   └── utils/           # Geocoding helpers
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── package.json
+│   └── vercel.json
+├── docker-compose.yml
+├── .env.example
+└── README.md
 ```
 
 ---
 
 ## 🔌 API Reference
 
-| Method | Endpoint | Description | Status |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/health` | Backend status check | ✅ Live |
-| `POST` | `/api/routes/calculate` | Calculate road route distance, duration & polyline | ✅ Live |
-| `POST` | `/api/routes/matrix` | Generate $N \times N$ road distance & duration matrix | ✅ Live |
-| `GET` | `/api/routes/graph-schema` | Return conceptual graph node/edge structure | ✅ Live |
-| `GET` | `/api/vrp/formulation` | Retrieve active VRP formulation & constraints | ✅ Live |
-| `POST` | `/api/vrp/decode` | Decode discrete chromosome into explicit vehicle routes | ✅ Live |
-| `POST` | `/api/vrp/evaluate` | Evaluate candidate solution feasibility & fitness score | ✅ Live |
-| `POST` | `/api/optimization/run` | Execute QPSO / PSO optimization engine | 🚧 Integration Endpoint |
+The backend's interactive OpenAPI page is [`/docs`](https://iros-mipi.onrender.com/docs). Endpoint names below match the FastAPI route declarations in the project.
+
+### Health and service status
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/` | Backend product and service metadata |
+| `GET` | `/health` | Health status |
+| `GET` | `/api/routes/` | Routing provider status |
+| `GET` | `/api/optimization/` | Optimization status and supported solver metadata |
+
+### Routing and VRP
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/routes/calculate` | Calculate route geometry, distance, duration, and legs |
+| `POST` | `/api/routes/matrix` | Calculate pairwise route distance and duration matrices |
+| `GET` | `/api/routes/graph-schema` | Return the transportation graph/cost schema |
+| `GET` | `/api/vrp/formulation` | Return VRP formulation and constraint metadata |
+| `POST` | `/api/vrp/matrix` | Build matrix information for a VRP problem |
+| `POST` | `/api/vrp/decode` | Decode a discrete solution into vehicle routes |
+| `POST` | `/api/vrp/evaluate` | Evaluate candidate routes, feasibility, and fitness |
+
+### Optimization and run history
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/optimization/pso` | Execute the discrete PSO solver |
+| `POST` | `/api/optimization/qpso` | Execute the discrete QPSO solver |
+| `POST` | `/api/optimization/run` | Execute the solver selected in the request |
+| `POST` | `/api/optimization/compare` | Compare PSO and QPSO under the same problem conditions |
+| `GET` | `/api/optimization/runs` | List recent saved optimization runs |
+| `GET` | `/api/optimization/runs/{run_id}` | Retrieve a saved run and its metrics |
+| `GET` | `/api/optimization/runs/{run_id}/history` | Retrieve convergence history and iteration snapshots |
+| `GET` | `/api/optimization/runs/{run_id}/routes` | Retrieve saved vehicle routes and geometry |
+
+### Scenario persistence
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/scenarios/` | List saved scenarios |
+| `POST` | `/api/scenarios/` | Create a scenario |
+| `GET` | `/api/scenarios/{scenario_id}` | Retrieve scenario, fleet, stops, and latest run |
+| `PUT` | `/api/scenarios/{scenario_id}` | Update a scenario |
+| `DELETE` | `/api/scenarios/{scenario_id}` | Delete a scenario and associated runs/routes |
+| `POST` | `/api/scenarios/{scenario_id}/baseline` | Calculate and save the initial unoptimized plan |
+| `GET` | `/api/scenarios/{scenario_id}/latest-run` | Retrieve the latest saved run for a scenario |
 
 ---
 
-## 🚀 Quickstart & Setup Guide
+## 🚀 Quickstart
 
-### Option 1: Docker Compose Deployment (Recommended)
+### Prerequisites
+
+- Docker Desktop with Docker Compose
+- Internet access for OSRM routing, OpenStreetMap tiles, and optional Nominatim lookup
+
+### Option 1 · Full stack with Docker Compose
 
 ```bash
-# 1. Clone the repository
 git clone https://github.com/ayan-shaikh-78690/IROS.git
 cd IROS
-
-# 2. Build and launch containers
-docker-compose up --build
+docker compose up --build
 ```
-* **Frontend Web Dashboard:** `http://localhost:5173` (or `http://localhost:80`)
-* **Interactive FastAPI Swagger Docs:** `http://localhost:8000/docs`
 
----
+| Service | Local URL |
+|---|---|
+| Frontend dashboard | [http://localhost:5173](http://localhost:5173) |
+| Backend health | [http://localhost:8000/health](http://localhost:8000/health) |
+| FastAPI Swagger docs | [http://localhost:8000/docs](http://localhost:8000/docs) |
 
-### Option 2: Local Development Setup
+Stop the containers:
 
-#### 1. Backend Setup (FastAPI)
+```bash
+docker compose down
+```
+
+> **SQLite note:** The Compose file does not define a persistent volume. Data written inside a container may not survive container replacement. Configure a volume if you need durable local container data.
+
+### Option 2 · Run frontend and backend separately
+
+**Backend** (Python 3.11 recommended):
+
 ```bash
 cd backend
-python -m venv venv
+python -m venv .venv
+```
 
-# Activate virtual environment
-# On Windows PowerShell:
-.\venv\Scripts\activate
-# On Linux / macOS:
-source venv/bin/activate
+Activate the environment, then install and run:
 
+```bash
 pip install -r requirements.txt
-cp ../.env.example .env
-
-# Run FastAPI development server
 uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-#### 2. Frontend Setup (React + Vite)
+**Frontend** (Node.js and npm):
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
----
-
-## 🚧 Implementation Status & Roadmap
-
-- [x] **Milestone 1:** OpenStreetMap & OSRM Real-Road Graph Ingestion
-- [x] **Milestone 2:** Discrete VRP Chromosome Representation & Decoder
-- [x] **Milestone 3:** Dynamic Constraint Evaluator (Capacity, Time Windows, Coverage Penalties)
-- [x] **Milestone 4:** FastAPI Backend & React Leaflet Interactive Command Center
-- [ ] **Milestone 5:** Vectorized QPSO Swarm Solver (`/api/optimization/run`)
-- [ ] **Milestone 6:** Empirical Convergence Benchmarking (Dijkstra vs A* vs GA vs PSO vs QPSO)
-- [ ] **Milestone 7:** Real-Time Traffic Feed Integration & Automatic Dynamic Rerouting
+The Vite development server runs at `http://localhost:5173`. Set `VITE_BACKEND_URL` to `http://127.0.0.1:8000` when running the frontend separately if your local configuration needs it.
 
 ---
 
-## 📚 Scientific References
+## 🌐 Deployment
 
-1. **Smart India Hackathon 2026, Problem Statement 26137:** *"A Quantum-Inspired Intelligent Traffic Route Optimization in Transportation Systems Using Metaheuristic Optimization."*
-2. **Boeing, G. (2017):** *"OSMnx: New Methods for Acquiring, Constructing, Analyzing, and Visualizing Complex Street Networks."* Computers, Environment and Urban Systems, 65, 126–139.
-3. **Huber, S. & Rust, C. (2016):** *"Calculate Travel Time and Distance with OpenStreetMap Data Using Open Source Routing Machine (OSRM)."* The Stata Journal, 16(2), 416–423.
-4. **Liu, W., Dong, H., He, J. & Shi, H. (2017):** *"QPSO: Quantum-Behaved Particle Swarm Optimization for Global Search."* IEEE Transactions.
-5. **Kennedy, J. & Eberhart, R. (1995):** *"Particle Swarm Optimization."* IEEE International Conference on Neural Networks.
+| Component | Host | Link |
+|---|---|---|
+| Frontend | Vercel | [iros-chi.vercel.app](https://iros-chi.vercel.app) |
+| Backend | Render | [iros-mipi.onrender.com](https://iros-mipi.onrender.com) |
+| API documentation | FastAPI | [Open `/docs`](https://iros-mipi.onrender.com/docs) |
+| Health endpoint | FastAPI | [Open `/health`](https://iros-mipi.onrender.com/health) |
+
+The frontend reads its backend address from `VITE_BACKEND_URL`; Docker Compose configures the local value as `http://localhost:8000`. Hosted availability and response time depend on the hosting platform and external routing service.
+
+---
+
+## 🧭 Milestones and Roadmap
+
+| Milestone | Status | Scope |
+|---|---|---|
+| **M1 · Application foundation** | ✅ Implemented | React/Vite UI, FastAPI service, Docker setup |
+| **M2 · Routing and VRP foundation** | ✅ Implemented | OSRM route/matrix calls, discrete routes, decoder, constraints, SQLite scenarios |
+| **M3 · Classical PSO** | ✅ Implemented | Discrete swap-sequence PSO and run telemetry |
+| **M4 · Quantum-inspired QPSO** | ✅ Implemented | Discrete QPSO, convergence telemetry, PSO comparison |
+| **M5 · Traffic modeling** | 🔜 Future work | Implement and validate explicit time-dependent congestion modeling |
+| **M6 · Broader evaluation** | 🔜 Future work | Repeatable experiments across scenarios, sizes, seeds, and solver settings |
+| **M7 · Live traffic and rerouting** | 🔜 Future work | Evaluate a suitable live data source and operational rerouting |
+
+### Honest evaluation
+
+IROS reports metrics from actual application runs. This README does not claim fixed reductions in fuel use, cost, emissions, delivery delays, or solver runtime. Any future performance claims should publish the scenarios, parameters, seeds, and measured results behind them.
+
+---
+
+## 📚 References and Attribution
+
+1. Kennedy, J. and Eberhart, R. “Particle Swarm Optimization.” *Proceedings of the IEEE International Conference on Neural Networks*, 1995. [IEEE Xplore](https://ieeexplore.ieee.org/document/488968)
+2. Sun, J., Feng, B. and Xu, W. “Particle swarm optimization with particles having quantum behavior.” *Proceedings of the IEEE Congress on Evolutionary Computation*, 2004. [IEEE Xplore](https://ieeexplore.ieee.org/abstract/document/1330875/)
+3. [OSRM HTTP API documentation](https://project-osrm.org/docs/v26.5.0/http)
+4. [OpenStreetMap copyright and attribution](https://www.openstreetmap.org/copyright)
+5. [Leaflet documentation](https://leafletjs.com/reference.html)
+
+Map data © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright). OSRM, map tiles, and optional geocoding rely on external services and their availability and usage policies.
+
+---
+
+<div align="center">
+
+### 🚦 VEDIORA · IROS
+
+**Plan smarter · Compare transparently · Keep constraints in view**
+
+[Launch demo](https://iros-chi.vercel.app) · [Explore API](https://iros-mipi.onrender.com/docs) · [View source](https://github.com/ayan-shaikh-78690/IROS)
+
+**Smart India Hackathon 2026 · Problem Statement 26137 · Team ID 120148**
+
+</div>
